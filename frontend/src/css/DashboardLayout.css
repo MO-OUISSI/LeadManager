@@ -1,0 +1,35 @@
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--light-bg);
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-main {
+  flex: 1;
+  margin-left: 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.dashboard-main.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0;
+  }
+
+  .dashboard-content {
+    padding: 1rem;
+  }
+}

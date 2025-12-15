@@ -1,0 +1,225 @@
+.agents-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.agents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.agents-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--very-light-text);
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 2px solid var(--input-border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-shadow);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.agents-table-container {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  overflow-x: auto;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.agents-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.agents-table thead {
+  background-color: var(--light-bg);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.agents-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--light-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color 0.3s ease;
+}
+
+.agents-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s ease, border-color 0.3s ease;
+}
+
+.agents-table tbody tr:hover {
+  background-color: var(--light-bg);
+}
+
+.agents-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.agents-table td {
+  padding: 1rem;
+  font-size: 0.9375rem;
+  color: var(--dark-text);
+  transition: color 0.3s ease;
+}
+
+.agent-name-cell {
+  font-weight: 500;
+}
+
+.agent-email-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--light-text);
+  transition: color 0.3s ease;
+}
+
+.agent-stat-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--light-text);
+  transition: color 0.3s ease;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn.show-btn {
+  color: var(--accent-color);
+}
+
+.action-btn.show-btn:hover {
+  background-color: rgba(79, 195, 247, 0.1);
+  border-color: var(--accent-color);
+}
+
+.action-btn.edit-btn {
+  color: var(--primary-color);
+}
+
+.action-btn.edit-btn:hover {
+  background-color: rgba(58, 110, 165, 0.1);
+  border-color: var(--primary-color);
+}
+
+.action-btn.delete-btn {
+  color: var(--danger-color);
+}
+
+.action-btn.delete-btn:hover {
+  background-color: rgba(252, 129, 129, 0.1);
+  border-color: var(--danger-color);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--light-text);
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .agents-table-container {
+    overflow-x: auto;
+  }
+
+  .agents-table {
+    min-width: 800px;
+  }
+}
