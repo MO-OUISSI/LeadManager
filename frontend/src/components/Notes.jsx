@@ -29,7 +29,6 @@ const Notes = ({ leadId, onClose }) => {
           getNotesByLead(leadId),
           getLeadById(leadId)
         ]);
-        // Reverse to show oldest first, newest last (chat style)
         setNotes([...notesData].reverse());
         setLeadInfo(leadData);
       } catch (err) {
@@ -60,7 +59,6 @@ const Notes = ({ leadId, onClose }) => {
         content: newNote.trim(),
         leadId
       });
-      // Add new note at the end (newest at bottom)
       setNotes(prev => [...prev, createdNote]);
       setNewNote('');
       inputRef.current?.focus();

@@ -1,7 +1,6 @@
 const Note = require('../models/noteModel');
 const Lead = require('../models/leadModel');
 
-// Create a new note for a lead
 const createNote = async (req, res) => {
   try {
     const { content, leadId } = req.body;
@@ -14,7 +13,6 @@ const createNote = async (req, res) => {
       return res.status(400).json({ message: 'Lead ID is required' });
     }
 
-    // Verify that the lead exists
     const lead = await Lead.findById(leadId);
     if (!lead) {
       return res.status(404).json({ message: 'Lead not found' });
@@ -28,7 +26,6 @@ const createNote = async (req, res) => {
 
     const savedNote = await note.save();
     
-    // Populate user info for response
     await savedNote.populate('userId', 'name email');
 
     res.status(201).json(savedNote);
@@ -37,7 +34,6 @@ const createNote = async (req, res) => {
   }
 };
 
-// Get all notes for a specific lead (all users can view)
 const getNotesByLead = async (req, res) => {
   try {
     const { leadId } = req.params;
@@ -46,7 +42,6 @@ const getNotesByLead = async (req, res) => {
       return res.status(400).json({ message: 'Lead ID is required' });
     }
 
-    // Verify that the lead exists
     const lead = await Lead.findById(leadId);
     if (!lead) {
       return res.status(404).json({ message: 'Lead not found' });
@@ -54,7 +49,7 @@ const getNotesByLead = async (req, res) => {
 
     const notes = await Note.find({ leadId })
       .populate('userId', 'name email')
-      .sort({ createdAt: -1 }); // Most recent first
+      .sort({ createdAt: -1 }); 
 
     res.json(notes);
   } catch (error) {
@@ -62,7 +57,6 @@ const getNotesByLead = async (req, res) => {
   }
 };
 
-// Update a note (only the creator can update)
 const updateNote = async (req, res) => {
   try {
     const { id } = req.params;
@@ -78,7 +72,6 @@ const updateNote = async (req, res) => {
       return res.status(404).json({ message: 'Note not found' });
     }
 
-    // Check if the user is the creator of the note
     if (note.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'You can only edit your own notes' });
     }
@@ -94,7 +87,6 @@ const updateNote = async (req, res) => {
   }
 };
 
-// Delete a note (only the creator can delete)
 const deleteNote = async (req, res) => {
   try {
     const { id } = req.params;
@@ -105,7 +97,6 @@ const deleteNote = async (req, res) => {
       return res.status(404).json({ message: 'Note not found' });
     }
 
-    // Check if the user is the creator of the note
     if (note.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'You can only delete your own notes' });
     }

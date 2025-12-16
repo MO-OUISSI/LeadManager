@@ -21,7 +21,7 @@ const Leads = () => {
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [visibleCount, setVisibleCount] = useState(8);
-  const [editingField, setEditingField] = useState(null); // { leadId, field }
+  const [editingField, setEditingField] = useState(null); 
   const [editValues, setEditValues] = useState({});
   const [updatingId, setUpdatingId] = useState(null);
   const [showNotes, setShowNotes] = useState(false);
@@ -82,7 +82,7 @@ const Leads = () => {
     if (importStatus) {
       const timer = setTimeout(() => {
         setImportStatus(null);
-      }, 10000); // Auto-dismiss after 10 seconds
+      }, 10000); 
       return () => clearTimeout(timer);
     }
   }, [importStatus]);
@@ -167,7 +167,7 @@ const Leads = () => {
     if (!dateValue) return null;
     if (dateValue instanceof Date) return dateValue.toISOString().split('T')[0];
     if (typeof dateValue === 'number') {
-      // Excel date serial number
+      
       const excelEpoch = new Date(1899, 11, 30);
       const date = new Date(excelEpoch.getTime() + dateValue * 86400000);
       return date.toISOString().split('T')[0];
@@ -203,7 +203,7 @@ const Leads = () => {
       const headers = jsonData[0];
       const dataRows = jsonData.slice(1);
 
-      // Find column indices
+      
       const nomIndex = findColumnIndex(headers, ['nom complet', 'nom', 'name']);
       const prenomIndex = findColumnIndex(headers, ['prenom', 'prénom', 'firstname']);
       const telephoneIndex = findColumnIndex(headers, ['telephone', 'téléphone', 'phone', 'tel']);
@@ -213,7 +213,6 @@ const Leads = () => {
   'dernier appel',
   'date dernier appel'
 ]);
-
       const prochainRDVIndex = findColumnIndex(headers, ['prochain rdv', 'prochain rendez-vous', 'next meeting', 'rdv']);
       const nfIndex = findColumnIndex(headers, ['nf', 'note', 'rating']);
       const etatIndex = findColumnIndex(headers, ['etat', 'état', 'status', 'state']);
@@ -226,10 +225,10 @@ const Leads = () => {
 
       for (let i = 0; i < dataRows.length; i++) {
         const row = dataRows[i];
-        if (!row || row.every(cell => !cell)) continue; // Skip empty rows
+        if (!row || row.every(cell => !cell)) continue; 
 
         try {
-          // Parse nom complet or separate nom/prenom
+          
           let nom = '';
           let prenom = '';
           
@@ -248,7 +247,7 @@ const Leads = () => {
             prenom = String(row[prenomIndex]).trim();
           }
           if (nomIndex >= 0 && nomIndex === prenomIndex && !prenom) {
-            // If same column, try to split
+            
             const nomComplet = String(row[nomIndex]).trim();
             const parts = nomComplet.split(/\s+/);
             if (parts.length >= 2) {
@@ -316,7 +315,7 @@ const Leads = () => {
         }
       }
 
-      // Refresh leads list
+      
       const updatedLeads = await listLeads();
       const sorted = Array.isArray(updatedLeads)
         ? [...updatedLeads].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))

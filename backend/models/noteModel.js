@@ -18,7 +18,6 @@ const noteSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Index for faster queries
 noteSchema.index({ leadId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Note', noteSchema);
