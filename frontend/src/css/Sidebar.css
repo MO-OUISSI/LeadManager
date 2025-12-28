@@ -18,7 +18,10 @@
 }
 
 .sidebar-header {
-  padding: 1.75rem 1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 1.2rem;
+  padding-top: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -225,7 +228,7 @@
 .sidebar-toggle-btn {
   position: absolute;
   right: -12px;
-  top: 45%;
+  top: 49%;
   transform: translateY(-50%);
   width: 37px;
   height: 37px;

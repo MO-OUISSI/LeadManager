@@ -72,7 +72,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (status) {
-      const timer = setTimeout(() => setStatus(null), 4000); 
+      const timer = setTimeout(() => setStatus(null), 4000);
       return () => clearTimeout(timer);
     }
   }, [status]);
@@ -108,19 +108,37 @@ const Profile = () => {
 
         <div className="profile-content">
           <div className="profile-card">
-            <div className="profile-avatar-section">
+            <div className="profile-card-header">
               <div className="profile-avatar">
                 <span>{(displayUser.name || '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}</span>
               </div>
-              <div className="profile-info-header">
+              <div className="profile-header-info">
                 <h3 className="profile-name">{displayUser.name}</h3>
                 <span className={`profile-role ${displayUser.role}`}>
                   {displayUser.role === 'admin' ? 'Administrateur' : 'Agent'}
                 </span>
-                <p className="profile-email">{displayUser.email}</p>
-                <p className="profile-joined">
-                  Membre depuis {new Date(displayUser.createdAt || Date.now()).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}
-                </p>
+              </div>
+            </div>
+            <div className="profile-card-body">
+              <div className="profile-info-item">
+                <div className="profile-info-icon">
+                  <Mail size={18} />
+                </div>
+                <div className="profile-info-content">
+                  <span className="profile-info-label">Email</span>
+                  <span className="profile-info-value">{displayUser.email}</span>
+                </div>
+              </div>
+              <div className="profile-info-item">
+                <div className="profile-info-icon">
+                  <Calendar size={18} />
+                </div>
+                <div className="profile-info-content">
+                  <span className="profile-info-label">Membre depuis</span>
+                  <span className="profile-info-value">
+                    {new Date(displayUser.createdAt || Date.now()).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -188,16 +206,19 @@ const Profile = () => {
                   <label htmlFor="newPassword" className="form-label">
                     Nouveau mot de passe
                   </label>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    className="form-input"
-                    placeholder="••••••••"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    minLength="6"
-                  />
+                  <div className="input-wrapper">
+                    <Shield className="input-icon" size={20} />
+                    <input
+                      type="password"
+                      id="newPassword"
+                      name="newPassword"
+                      className="form-input"
+                      placeholder="••••••••"
+                      value={formData.newPassword}
+                      onChange={handleChange}
+                      minLength="6"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

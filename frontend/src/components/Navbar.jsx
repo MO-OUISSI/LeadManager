@@ -32,7 +32,7 @@ const Navbar = () => {
   }, [location]);
 
   useEffect(() => {
-    // Check if admin exists when component mounts
+    
     if (adminExists === null) {
       checkAdminExists();
     }

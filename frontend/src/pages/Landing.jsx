@@ -155,8 +155,8 @@ const Landing = () => {
                 Vous avez une question, un commentaire ou besoin d'aide ? N'hésitez pas à nous contacter.
               </p>
               <div className="contact-details">
-                <p><strong>Email :</strong> contact@leadmanager.com</p>
-                <p><strong>Téléphone :</strong> +33 1 23 45 67 89</p>
+                <p><strong>Email :</strong>      ......</p>
+                <p><strong>Téléphone :</strong>      ......</p>
               </div>
             </div>
             <div className="contact-card-right">

@@ -28,6 +28,7 @@ const Leads = () => {
   const [selectedLeadId, setSelectedLeadId] = useState(null);
   const [importing, setImporting] = useState(false);
   const [importStatus, setImportStatus] = useState(null);
+  const [showExcelGuide, setShowExcelGuide] = useState(false);
   const fileInputRef = useRef(null);
 
   const etats = ['Nouveau', 'En cours', 'Qualifié', 'Non qualifié', 'Gagné', 'Perdu'];
@@ -341,6 +342,11 @@ const Leads = () => {
   };
 
   const handleImportClick = () => {
+    setShowExcelGuide(true);
+  };
+
+  const handleProceedImport = () => {
+    setShowExcelGuide(false);
     fileInputRef.current?.click();
   };
 
@@ -758,6 +764,87 @@ const Leads = () => {
             setSelectedLeadId(null);
           }}
         />
+      )}
+      {showExcelGuide && (
+        <div className="excel-guide-overlay" onClick={(e) => e.target.classList.contains('excel-guide-overlay') && setShowExcelGuide(false)}>
+          <div className="excel-guide-container">
+            <div className="excel-guide-header">
+              <div className="excel-guide-header-content">
+                <FileSpreadsheet size={24} className="excel-guide-icon" />
+                <div>
+                  <h3 className="excel-guide-title">Format du fichier Excel</h3>
+                  <p className="excel-guide-subtitle">Structure requise pour l'importation</p>
+                </div>
+              </div>
+              <button className="excel-guide-close-btn" onClick={() => setShowExcelGuide(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="excel-guide-content">
+              <p className="excel-guide-description">
+                Votre fichier Excel doit contenir les colonnes suivantes dans l'ordre indiqué :
+              </p>
+              <div className="excel-guide-table-wrapper">
+                <table className="excel-guide-table">
+                  <thead>
+                    <tr>
+                      <th>nom</th>
+                      <th>prenom</th>
+                      <th>telephone</th>
+                      <th>nbAppels</th>
+                      <th>dateDernierAppel</th>
+                      <th>dateProchainRDV</th>
+                      <th>NF</th>
+                      <th>etat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Ahmed</td>
+                      <td>Salah</td>
+                      <td>0612345678</td>
+                      <td>2</td>
+                      <td>2025-01-15</td>
+                      <td>2025-02-01</td>
+                      <td>3</td>
+                      <td>Nouveau</td>
+                    </tr>
+                    <tr>
+                      <td>Meryem</td>
+                      <td>Zahid</td>
+                      <td>0654321987</td>
+                      <td>5</td>
+                      <td>2025-01-10</td>
+                      <td>2025-01-28</td>
+                      <td>4</td>
+                      <td>En cours</td>
+                    </tr>
+                    <tr>
+                      <td>Hicham</td>
+                      <td>Benz</td>
+                      <td>0678912345</td>
+                      <td>1</td>
+                      <td>2025-01-12</td>
+                      <td>2025-01-30</td>
+                      <td>5</td>
+                      <td>Qualifié</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+            </div>
+            <div className="excel-guide-actions">
+              <button className="btn-excel-cancel" onClick={() => setShowExcelGuide(false)}>
+                Annuler
+              </button>
+              <button className="btn-excel-proceed" onClick={handleProceedImport}>
+                <Upload size={18} />
+                Continuer l'importation
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </DashboardLayout>
   );

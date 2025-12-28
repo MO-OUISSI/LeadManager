@@ -173,6 +173,7 @@
   border-color: var(--border-color);
 }
 
+
 @media (max-width: 768px) {
   .form-actions {
     flex-direction: column;

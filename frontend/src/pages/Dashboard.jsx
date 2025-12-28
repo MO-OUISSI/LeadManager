@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Clipboard, PlusCircle, Check, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { X, Check, Calendar, MessageSquare, Edit, Trash2, Sparkles, Clock, Trophy, XCircle, Users, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import '../css/Dashboard.css';
-import { listLeads } from '../api/leadsApi';
+import { listLeads, deleteLead } from '../api/leadsApi';
 import { useDarkMode } from '../contexts/DarkModeContext';
 import Loading from '../components/Loading';
+import Notes from '../components/Notes';
 
 const Dashboard = () => {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [showNotes, setShowNotes] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState(null);
   const { isDarkMode } = useDarkMode();
   const navigate = useNavigate();
 
@@ -57,65 +59,103 @@ const Dashboard = () => {
   }, []);
 
   const totalLeads = leads.length;
-  const nouveaus = leads.filter(l => l.etat === 'Nouveau').length;
+  const enCours = leads.filter(l => l.etat === 'En cours').length;
   const qualifies = leads.filter(l => l.etat === 'Qualifié').length;
 
+  const calculatePercentage = (value, total) => {
+    if (total === 0) return 0;
+    return Math.round((value / total) * 100);
+  };
+
   const stats = [
-    { label: 'Total Leads', value: totalLeads, icon: Clipboard, color: '#216d69' },
-    { label: 'Nouveaux', value: nouveaus, icon: PlusCircle, color: '#216d69' },
-    { label: 'Qualifiés', value: qualifies, icon: Check, color: '#216d69' },
+    { 
+      label: 'Total Leads', 
+      value: totalLeads, 
+      percentage: 100,
+      icon: Users, 
+      isPrimary: true,
+      color: isDarkMode ? '#ffffffff' : '#ffffffff'
+    },
+    { 
+      label: 'Qualifiés', 
+      value: qualifies, 
+      percentage: calculatePercentage(qualifies, totalLeads),
+      icon: Check, 
+      isPrimary: false,
+      color: isDarkMode ? '#4ADE80' : '#15803D' 
+    },
+    { 
+      label: 'En cours', 
+      value: enCours, 
+      percentage: calculatePercentage(enCours, totalLeads),
+      icon: Clock, 
+      isPrimary: false,
+      color: isDarkMode ? '#FACC15' : '#B45309' 
+    },
   ];
 
   const etatList = ['Nouveau', 'En cours', 'Qualifié', 'Non qualifié', 'Gagné', 'Perdu'];
 
   const etatDistribution = etatList.map((etat) => {
     const count = leads.filter(l => l.etat === etat).length;
-    const percentage = totalLeads > 0 ? Math.round((count / totalLeads) * 100) : 0;
+    const percentage = leads.length > 0 ? Math.round((count / leads.length) * 100) : 0;
     return { etat, count, percentage };
   });
 
-  const recentLeads = [...leads]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Find the next upcoming RDVs grouped by date
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Set to midnight for proper date comparison
+  
+  const upcomingRDVs = leads
+    .filter(lead => lead.dateProchainRDV)
+    .map(lead => {
+      const rdvDate = new Date(lead.dateProchainRDV);
+      rdvDate.setHours(0, 0, 0, 0);
+      return {
+        ...lead,
+        dateProchainRDV: rdvDate
+      };
+    })
+    .filter(lead => lead.dateProchainRDV >= now)
+    .sort((a, b) => a.dateProchainRDV - b.dateProchainRDV);
 
-  useEffect(() => {
-    if (recentLeads.length <= 1 || isPaused) return;
+  // Group RDVs by date and get the next date's RDVs
+  const rdvsByDate = upcomingRDVs.reduce((acc, lead) => {
+    const dateKey = lead.dateProchainRDV.toISOString().split('T')[0];
+    if (!acc[dateKey]) {
+      acc[dateKey] = [];
+    }
+    acc[dateKey].push(lead);
+    return acc;
+  }, {});
 
-    const interval = setInterval(() => {
-      setCurrentCardIndex((prev) => {
-        if (prev >= recentLeads.length - 1) {
-          return 0; 
-        }
-        return prev + 1;
-      });
-    }, 4000); 
+  const nextDateKey = Object.keys(rdvsByDate).sort()[0];
+  const nextRDVs = nextDateKey ? rdvsByDate[nextDateKey] : [];
+  const nextRDVDate = nextDateKey ? new Date(nextDateKey) : null;
 
-    return () => clearInterval(interval);
-  }, [recentLeads.length, isPaused]);
+  const handleShowNotes = (leadId) => {
+    setSelectedLeadId(leadId);
+    setShowNotes(true);
+  };
+
+  const handleEdit = (leadId) => {
+    navigate(`/user/leads/${leadId}/edit`);
+  };
+
+  const handleDelete = async (leadId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce lead ?')) return;
+    try {
+      setDeletingId(leadId);
+      await deleteLead(leadId);
+      setLeads(prev => prev.filter(lead => lead._id !== leadId));
+    } catch (err) {
+      alert(err.message || 'Impossible de supprimer ce lead.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) return <DashboardLayout><Loading /></DashboardLayout>;
-
-  
-  const nextCard = () => {
-    setIsPaused(true);
-    setCurrentCardIndex((prev) => 
-      prev < recentLeads.length - 1 ? prev + 1 : prev
-    );
-    
-    setTimeout(() => setIsPaused(false), 10000);
-  };
-
-  const prevCard = () => {
-    setIsPaused(true);
-    setCurrentCardIndex((prev) => 
-      prev > 0 ? prev - 1 : 0
-    );
-    
-    setTimeout(() => setIsPaused(false), 10000);
-  };
-
-  const handleViewDetails = (leadId) => {
-    navigate(`/user/leads/${leadId}`);
-  };
 
   return (
     <DashboardLayout>
@@ -129,28 +169,69 @@ const Dashboard = () => {
         <div className="stats-grid">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
+            const colors = stat.label === 'Qualifiés' 
+              ? getEtatColor('Qualifié')
+              : stat.label === 'En cours'
+              ? getEtatColor('En cours')
+              : null;
+            
+            const iconColor = colors ? colors.text : stat.color;
+            const iconBgColor = colors ? colors.bg : (isDarkMode ? 'rgba(59, 130, 246, 0.15)' : 'rgba(37, 99, 235, 0.1)');
+            
             return (
-              <div key={index} className="stat-card">
+              <div 
+                key={index} 
+                className={`stat-card ${stat.isPrimary ? 'stat-card-primary' : ''}`}
+              >
                 <div
                   className="stat-icon-wrapper"
-                  style={{ backgroundColor: `${stat.color}15` }}
+                  style={{ 
+                    backgroundColor: iconBgColor,
+                    background: stat.isPrimary 
+                      ? `linear-gradient(135deg, ${isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)'}, ${isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.08)'})`
+                      : iconBgColor
+                  }}
                 >
-                  <Icon size={24} style={{ color: stat.color }} />
+                  <Icon size={stat.isPrimary ? 28 : 24} style={{ color: iconColor }} />
                 </div>
                 <div className="stat-content">
                   <p className="stat-label">{stat.label}</p>
                   <h3 className="stat-value">{stat.value}</h3>
+                  <div className="stat-percentage">
+                    <div className="stat-percentage-bar">
+                      <div 
+                        className="stat-percentage-fill"
+                        style={{ 
+                          width: `${stat.percentage}%`,
+                          backgroundColor: stat.isPrimary 
+                            ? 'rgba(255, 255, 255, 0.3)' 
+                            : colors ? colors.text : stat.color
+                        }}
+                      ></div>
+                    </div>
+                    <span className="stat-percentage-text">{stat.percentage}%</span>
+                  </div>
                 </div>
+                {stat.isPrimary && (
+                  <div className="stat-card-decoration"></div>
+                )}
               </div>
             );
           })}
         </div>
 
         <div className="dashboard-grid">
-          
           <div className="analytics-chart-card">
             <div className="chart-header">
               <h3 className="chart-title">Distribution par état</h3>
+              <button 
+                onClick={() => navigate('/user/analytics')}
+                className="chart-see-all-btn"
+                title="Voir tous les détails"
+              >
+                <span>Voir tout</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
             <div className="chart-content">
               <div className="state-distribution">
@@ -177,122 +258,93 @@ const Dashboard = () => {
             </div>
           </div>
 
-          
-          <div className="dashboard-card">
-            <div className="card-header">
-              <div className="carousel-header">
-                <h3 className="card-title">Leads récents</h3>
-                <div className="carousel-counter">
-                  {recentLeads.length > 0 && (
-                    <span>{currentCardIndex + 1} / {recentLeads.length}</span>
+          {nextRDVs.length > 0 && nextRDVDate && (
+            <div className="analytics-chart-card">
+              <div className="chart-header">
+                <div className="chart-header-content">
+                  <h3 className="chart-title">Prochain RDV</h3>
+                </div>
+                <div className="chart-header-date">
+                  {nextRDVDate.toLocaleDateString('fr-FR', { 
+                    weekday: 'long',
+                    day: 'numeric', 
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                  {nextRDVs.length > 1 && (
+                    <span className="rdv-count-badge">{nextRDVs.length} rendez-vous</span>
                   )}
                 </div>
               </div>
-            </div>
-            <div className="card-content">
-              {recentLeads.length > 0 ? (
-                <div className="lead-carousel">
-                  <div 
-                    className="lead-card-container"
-                    onMouseEnter={() => setIsPaused(true)}
-                    onMouseLeave={() => setIsPaused(false)}
-                  >
+              <div className="chart-content">
+                <div className="rdv-list">
+                  {nextRDVs.map((rdv, index) => (
                     <div 
-                      className="lead-card-wrapper"
-                      style={{
-                        transform: `translateX(-${currentCardIndex * 100}%)`,
-                        transition: 'transform 0.5s ease-in-out'
-                      }}
+                      key={rdv._id} 
+                      className="rdv-item"
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      {recentLeads.map((lead) => (
-                        <div key={lead._id} className="lead-card">
-                          <div className="lead-card-header">
-                            <div className="lead-avatar">
-                              {lead.prenom.charAt(0)}{lead.nom.charAt(0)}
-                            </div>
-                            <div className="lead-card-info">
-                              <h4 className="lead-card-name">
-                                {lead.prenom} {lead.nom}
-                              </h4>
-                              <p className="lead-card-phone">{lead.telephone}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="lead-card-details">
-                            {lead.dateDernierAppel && (
-                              <div className="lead-detail-item">
-                                <span className="detail-label">Dernier appel:</span>
-                                <span className="detail-value">
-                                  {new Date(lead.dateDernierAppel).toLocaleDateString('fr-FR')}
-                                </span>
-                              </div>
-                            )}
-                            {lead.dateProchainRDV && (
-                              <div className="lead-detail-item">
-                                <span className="detail-label">Prochain RDV:</span>
-                                <span className="detail-value">
-                                  {new Date(lead.dateProchainRDV).toLocaleDateString('fr-FR')}
-                                </span>
-                              </div>
-                            )}
-                            {!lead.dateDernierAppel && !lead.dateProchainRDV && (
-                              <div className="lead-detail-item">
-                                <span className="detail-label">Créé le:</span>
-                                <span className="detail-value">
-                                  {new Date(lead.createdAt).toLocaleDateString('fr-FR')}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="lead-card-footer">
-                            <div
-                              className="lead-state-badge"
-                              style={{
-                                backgroundColor: getEtatColor(lead.etat).bg,
-                                color: getEtatColor(lead.etat).text,
-                              }}
-                            >
-                              {lead.etat}
-                            </div>
-                            <button
-                              className="view-details-btn"
-                              onClick={() => handleViewDetails(lead._id)}
-                            >
-                              <ExternalLink size={16} />
-                              Voir détails
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                      <div className="rdv-item-avatar">
+                        {rdv.prenom.charAt(0)}{rdv.nom.charAt(0)}
+                      </div>
+                      <div className="rdv-item-info">
+                        <span className="rdv-item-name">
+                          {rdv.prenom} {rdv.nom}
+                        </span>
+                        {rdv.telephone && (
+                          <span className="rdv-item-phone">{rdv.telephone}</span>
+                        )}
+                      </div>
+                      <div 
+                        className="rdv-item-badge"
+                        style={{
+                          backgroundColor: getEtatColor(rdv.etat).bg,
+                          color: getEtatColor(rdv.etat).text,
+                        }}
+                      >
+                        {rdv.etat}
+                      </div>
+                      <div className="rdv-item-actions">
+                        <button 
+                          onClick={() => handleShowNotes(rdv._id)} 
+                          className="action-btn show-btn" 
+                          title="Notes"
+                        >
+                          <MessageSquare size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleEdit(rdv._id)} 
+                          className="action-btn edit-btn" 
+                          title="Modifier"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(rdv._id)} 
+                          className="action-btn delete-btn" 
+                          title="Supprimer" 
+                          disabled={deletingId === rdv._id}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="carousel-controls">
-                    <button
-                      className="carousel-btn"
-                      onClick={prevCard}
-                      disabled={currentCardIndex === 0}
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      className="carousel-btn"
-                      onClick={nextCard}
-                      disabled={currentCardIndex === recentLeads.length - 1}
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ) : (
-                <p className="no-leads-message">Aucun lead disponible</p>
-              )}
+              </div>
             </div>
-          </div>
-          
+          )}
         </div>
       </div>
+      {showNotes && selectedLeadId && (
+        <Notes
+          leadId={selectedLeadId}
+          onClose={() => {
+            setShowNotes(false);
+            setSelectedLeadId(null);
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 };
